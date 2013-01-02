@@ -21,7 +21,7 @@ def build_template(env, template, **kwargs):
         passed to the template to be used as needed.
     """
     head, tail = os.path.split(template.name)
-    if not os.path.exists(head):
+    if head and not os.path.exists(head):
         os.makedirs(head)
     template.stream(**kwargs).dump(template.name, encoding='utf-8')
 
