@@ -11,7 +11,7 @@ import easywatch
 from jinja2 import Environment, FileSystemLoader
 
 
-def build_template(env, template, outpath, **kwargs):
+def build_template(env, template, **kwargs):
     """Compile a template.
     *   env should be a Jinja environment variable indicating where to find the
         templates.
@@ -22,17 +22,15 @@ def build_template(env, template, outpath, **kwargs):
         passed to the template to be used as needed.
     """
     head, tail = os.path.split(template.name)
-    if head:
-        head = os.path.join(outpath, head)
-        if not os.path.exists(head):
-            os.makedirs(head)
-    template.stream(**kwargs).dump(os.path.join(outpath, template.name))
+    if not os.path.exists(head):
+        os.makedirs(head)
+    template.stream(**kwargs).dump(template.name)
 
 
 def should_render(filename):
     """Check if the file should be rendered.
-    -   Hidden files will not be rendered.
-    -   Files prefixed with an underscore are assumed to be partials and will
+    *   Hidden files will not be rendered.
+    *   Files prefixed with an underscore are assumed to be partials and will
         not be rendered.
     """
     _, tail = os.path.split(filename)
@@ -42,14 +40,14 @@ def should_render(filename):
 def render_templates(env, outpath, contexts=None, filter_func=None,
                      rules=None):
     """Render each template inside of `env`.
-    -   env should be a Jinja environment object.
-    *   outpath should be the name of the directory to build the template to
-    -   contexts should be a list of regex-function pairs where the
+    *   env should be a Jinja environment object.
+    *   outpath should be the name of the directory to build the template to.
+    *   contexts should be a list of regex-function pairs where the
         function should return a context for that template and the regex,
         if matched against a filename, will cause the context to be used.
-    -   filter_func should be a function that takes a filename and returns
+    *   filter_func should be a function that takes a filename and returns
         a boolean indicating whether or not a template should be rendered.
-    -   rules are used to override template compilation. The value of rules
+    *   rules are used to override template compilation. The value of rules
         should be a list of `regex`-`function` pairs where `function` takes
         a jinja2 Environment, the filename, and the context and builds the
         template, and `regex` is a regex that if matched against a filename
@@ -79,27 +77,28 @@ def render_templates(env, outpath, contexts=None, filter_func=None,
             context = {}
 
         # build the template
+        template.name = os.path.join(outpath, template.name)
         for regex, func in rules:
             if re.match(regex, template_name):
                 func(env, template, **context)
                 break
         else:
-            build_template(env, template, outpath, **context)
+            build_template(env, template, **context)
 
 
 def main(searchpath="templates", outpath=".", filter_func=None, contexts=None,
          extensions=None, rules=None, autoreload=True):
     """
     Render each of the templates and then recompile on any changes.
-    -   searchpath should be the directory that contains the template.
+    *   searchpath should be the directory that contains the template.
         Defaults to "templates"
-    -   filter_func should be a function that takes a filename and returns
+    *   filter_func should be a function that takes a filename and returns
         a boolean indicating whether or not a template should be rendered.
         Defaults to ignore any files with '.' or '_' prefixes.
-    -   contexts should be a map of template names to functions where each
+    *   contexts should be a map of template names to functions where each
         function should return a context for that template.
-    -   extensions should be any extensions to add to the Environment.
-    -   autoreload should be a boolean indicating whether or not to
+    *   extensions should be any extensions to add to the Environment.
+    *   autoreload should be a boolean indicating whether or not to
         automatically recompile templates. Defaults to true.
     """
     if extensions is None:
