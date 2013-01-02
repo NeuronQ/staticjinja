@@ -86,6 +86,20 @@ def render_templates(env, outpath, contexts=None, filter_func=None,
             build_template(env, template, **context)
 
 
+def set_exit_on_sigint():
+    """Make Ctr+C work (reliably or at all) on Windows"""
+
+    import signal
+    import sys
+
+    def signal_handler(signal, frame):
+            sys.exit(0)
+    signal.signal(signal.SIGINT, signal_handler)
+
+    if hasattr(signal, 'pause'):
+        signal.pause()
+
+
 def main(searchpath="templates", outpath=".", filter_func=None, contexts=None,
          extensions=None, rules=None, autoreload=True):
     """
@@ -119,6 +133,7 @@ def main(searchpath="templates", outpath=".", filter_func=None, contexts=None,
         render_templates(env, outpath, contexts, filter_func=filter_func,
                          rules=rules)
         print "Templates built."
+
     build_all()
 
     if autoreload:
@@ -131,5 +146,8 @@ def main(searchpath="templates", outpath=".", filter_func=None, contexts=None,
                     build_all()
         easywatch.watch("./" + searchpath, handler)
 
-        print "Process killed"
+        set_exit_on_sigint()
+
+        print "Process killed."
+
     return 0
