@@ -140,7 +140,7 @@ def build_post(env, template, **kwargs):
             os.makedirs(head)
     else:
     	out = "%s.html" % (title, )
-    template.stream(**kwargs).dump(out)
+    template.stream(**kwargs).dump(out, encoding='utf-8')
 
 
 if __name__ == "__main__":

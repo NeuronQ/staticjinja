@@ -17,7 +17,6 @@ def build_template(env, template, **kwargs):
         templates.
     *   template_name should be the name of the template as it appears inside
         of `./templates`.
-    *   outpath should be the name of the directory to build the template to
     *   kwargs should be a series of key-value pairs. These items will be
         passed to the template to be used as needed.
     """
