@@ -11,19 +11,22 @@ import easywatch
 from jinja2 import Environment, FileSystemLoader
 
 
-def build_template(env, template, **kwargs):
+def build_template(env, template, outpath, **kwargs):
     """Compile a template.
     *   env should be a Jinja environment variable indicating where to find the
         templates.
     *   template_name should be the name of the template as it appears inside
         of `./templates`.
+    *   outpath should be the name of the directory to build the template to.
     *   kwargs should be a series of key-value pairs. These items will be
         passed to the template to be used as needed.
     """
     head, tail = os.path.split(template.name)
+    head = os.path.join(outpath, head)
     if head and not os.path.exists(head):
         os.makedirs(head)
-    template.stream(**kwargs).dump(template.name, encoding='utf-8')
+    template.stream(**kwargs).dump(os.path.join(head, tail),
+                                    encoding='utf-8')
 
 
 def should_render(filename):
@@ -76,13 +79,12 @@ def render_templates(env, outpath, contexts=None, filter_func=None,
             context = {}
 
         # build the template
-        template.name = os.path.join(outpath, template.name)
         for regex, func in rules:
             if re.match(regex, template_name):
-                func(env, template, **context)
+                func(env, template, outpath, **context)
                 break
         else:
-            build_template(env, template, **context)
+            build_template(env, template, outpath, **context)
 
 
 def set_exit_on_sigint():
@@ -103,8 +105,9 @@ def main(searchpath="templates", outpath=".", filter_func=None, contexts=None,
          extensions=None, rules=None, autoreload=True):
     """
     Render each of the templates and then recompile on any changes.
-    *   searchpath should be the directory that contains the template.
-        Defaults to "templates"
+    *   searchpath should be the directory that contains the templates.
+        Defaults to "templates".
+    *   outpath should be the name of the directory to build the templates to.
     *   filter_func should be a function that takes a filename and returns
         a boolean indicating whether or not a template should be rendered.
         Defaults to ignore any files with '.' or '_' prefixes.

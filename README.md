@@ -127,20 +127,20 @@ def get_contents(template):
 
 
 # compilation rule
-def build_post(env, template, **kwargs):
+def build_post(env, template, outpath, **kwargs):
     """
     Render a file using "_post.html".
     """
     template = env.get_template("_post.html")
     head, tail = os.path.split(template.name)
+    head = os.path.join(outpath, head)
     title, _ = tail.split('.')
-    if head:
-        out = "%s/%s.html" % (head, title)
-        if not os.path.exists(head):
-            os.makedirs(head)
+    if head and not os.path.exists(head):
+        os.makedirs(head)
     else:
     	out = "%s.html" % (title, )
-    template.stream(**kwargs).dump(out, encoding='utf-8')
+    template.stream(**kwargs).dump(os.path.join(head, title + '.html'),
+                                    encoding='utf-8')
 
 
 if __name__ == "__main__":
