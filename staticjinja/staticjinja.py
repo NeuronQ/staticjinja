@@ -24,7 +24,7 @@ def build_template(env, template, **kwargs):
     head, tail = os.path.split(template.name)
     if not os.path.exists(head):
         os.makedirs(head)
-    template.stream(**kwargs).dump(template.name)
+    template.stream(**kwargs).dump(template.name, encoding='utf-8')
 
 
 def should_render(filename):
